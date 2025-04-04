@@ -31,12 +31,24 @@ const Calculator = () => {
       const hasPercentCalculation = calculation.match(percentNumberRegex);
 
       if (hasPercentCalculation) {
-        const splitInIndex = operators
+        const percentageItSelfRegex = /[+\-*/]\d+%/g;
+
+        const plusAndMinus = ["+", "-"];
+
+        console.log(
+          // plusAndMinus
+          //   .map((operator) => calculation.lastIndexOf(operator))
+          //   .sort((a, b) => b - a)
+
+          calculation.match(percentageItSelfRegex)
+        );
+
+        const lastOperator = operators
           .map((operator) => calculation.lastIndexOf(operator))
           .sort((a, b) => b - a)[0];
 
-        const calc = calculation.slice(0, splitInIndex);
-        const percentCalc = calculation.slice(splitInIndex);
+        const calc = calculation.slice(0, lastOperator);
+        const percentCalc = calculation.slice(lastOperator);
         percentCalcs.push(percentCalc);
 
         return checkOperators(calc, percentCalcs);
@@ -65,7 +77,7 @@ const Calculator = () => {
             return calculate;
           }
         };
-
+        console.log(calculation);
         const finalResult = calculate1(calculation);
         console.log(" checkOperators ~ finalResult", finalResult);
         return finalResult;
