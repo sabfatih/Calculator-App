@@ -10,26 +10,76 @@ const Calculator = () => {
   const [inputUser, setInputUser] = useState("0");
   const [result, setResult] = useState("0");
 
-  const checkCalculation = (params) => {
-    const checkPercentage = params.replace(/(\d+)%/, "");
+  const checkOperators = (calculation, percentCalcsArgs) => {
     const operators = ["+", "-", "*", "/"];
 
     if (operators.includes(calculation.slice(-1))) {
       const result = calculation.slice(0, -1);
-      return checkCalculation(result);
+      return checkOperators(result);
     } else {
-      return calculation;
+      let percentCalcs = percentCalcsArgs || [];
+
+      const divideByZeroRegex = /\/0/;
+      const isDivideByZero = calculation.match(divideByZeroRegex);
+
+      if (isDivideByZero) {
+        setResult("Error");
+        return false;
+      }
+
+      const percentNumberRegex = /(\d+)%/;
+      const hasPercentCalculation = calculation.match(percentNumberRegex);
+
+      if (hasPercentCalculation) {
+        const splitInIndex = operators
+          .map((operator) => calculation.lastIndexOf(operator))
+          .sort((a, b) => b - a)[0];
+
+        const calc = calculation.slice(0, splitInIndex);
+        const percentCalc = calculation.slice(splitInIndex);
+        percentCalcs.push(percentCalc);
+
+        return checkOperators(calc, percentCalcs);
+      } else {
+        const calculate1 = (calcYee) => {
+          const calculate = new Function(`return ${calcYee}`)();
+          if (percentCalcs.length > 0) {
+            const percent = percentCalcs[0].replace("%", "/100");
+
+            let result;
+            if (percent[0] == "*" || percent[0] == "/") {
+              const percentLogic = new Function(
+                `return ${calculate + percent}`
+              )();
+
+              result = percentLogic;
+            } else {
+              const percentLogic = new Function(
+                `return ${calculate + "*" + percent}`
+              )();
+              result = calculate + percentLogic;
+            }
+            percentCalcs.shift();
+            return calculate1(result);
+          } else {
+            return calculate;
+          }
+        };
+
+        const finalResult = calculate1(calculation);
+        console.log(" checkOperators ~ finalResult", finalResult);
+        return finalResult;
+      }
     }
   };
 
   useEffect(() => {
-    const calculation = checkCalculation(
-      inputUser.replaceAll("×", "*").replaceAll("--", "+")
+    const calculation = checkOperators(
+      inputUser.replaceAll("×", "*").replaceAll("--", "+").replaceAll("+-", "-")
     );
-    console.log(calculation);
-    const calculate = new Function(`return ${calculation}`)();
+    console.log(" useEffect ~ calculation", calculation);
 
-    setResult(calculate);
+    setResult(calculation);
   }, [inputUser]);
 
   return (
@@ -100,8 +150,7 @@ const Button = ({ input, setInputUser }) => {
                 (input == "+" ||
                   input == "×" ||
                   input == "/" ||
-                  input == "%" ||
-                  input == "0")) ||
+                  input == "%")) ||
               (operators.includes(prev.slice(-1)) &&
                 operators.includes(prev.slice(-2, -1)) &&
                 input == "-")
