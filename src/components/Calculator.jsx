@@ -92,6 +92,95 @@ const Calculator = () => {
     setResult(calculation);
   }, [inputUser]);
 
+  const inputHandler = (input) => {
+    const operators = ["+", "-", "×", "÷", "*", "/"];
+
+    // console.log("aifbo+1231-/-41*-3-+".match(repeatedOperatorsRegex));
+    // console.log("aifbo1231--41+3".match(repeatedOperatorsRegex));
+
+    setInputUser((prev) => {
+      let acceptedInput = "";
+      let finalInput = "";
+      // const splitLastOperator = operators
+      //   .map((operator) => prev.lastIndexOf(operator))
+      //   .sort((a, b) => b - a)[0];
+      // const lastPrevNumber = prev.slice(splitLastOperator + 1);
+
+      // const splitFirstOperator = operators
+      //   .map((operator) => prev.lastIndexOf(operator))
+      //   .sort((a, b) => b - a)[0];
+      // const firstNumber = prev.slice(splitFirstOperator + 1);
+
+      const invalidPattern = /[+\-×÷*/.](?!-)(?:[+\-×÷*/.]*[+\×÷*/])+/g;
+
+      // const repeatedCharsRegex = /[+\-×÷*/](?!-)[+\-×÷*/.]*(?<!\.)\./g;
+      // const repeatedDotRegex = /\d*\.\d*\./g
+
+      console.log(input.match(invalidPattern));
+
+      if (input.match(invalidPattern)) {
+        console.log(",memeememek");
+        acceptedInput = input.replace(invalidPattern, "$1");
+      }
+
+      // if (
+      //   input.match(repeatedCharsRegex) ||
+      //   (lastPrevNumber.indexOf(".") > 0 && input == ".") // no more than 1 coma in decimal
+      // ) {
+      //   if (input.match(repeatedCharsRegex)) {
+      //   }
+      // }
+
+      const firstCharInput = acceptedInput.slice(0, 1);
+      if (prev == "") {
+        if (
+          firstCharInput == "+" ||
+          firstCharInput == "×" ||
+          firstCharInput == "÷" ||
+          firstCharInput == "*" ||
+          firstCharInput == "/" ||
+          firstCharInput == "%"
+        ) {
+          acceptedInput = acceptedInput.slice(1);
+        } else {
+          if (firstCharInput == ".") {
+            acceptedInput = "0" + acceptedInput;
+          } else {
+            //
+          }
+        }
+
+        // return acceptedInput;
+        finalInput = acceptedInput;
+      } else {
+        // if (
+        //   (operators.includes(prev.slice(-1)) &&
+        //     (input == "+" ||
+        //       input == "×" ||
+        //       input == "÷" ||
+        //       input == "*" ||
+        //       input == "/" ||
+        //       input == "%")) ||
+        //   // all of these operators(except "-") and "%" can't be inputted after operators
+        //   (operators.includes(prev.slice(-1)) &&
+        //     operators.includes(prev.slice(-2, -1)) &&
+        //     input == "-") || // preventing repeated "-" because previous logic
+        //   (prev.slice(-1) == "." && input == ".") || // no coma repeated
+        //   (lastNumber.indexOf(".") > 0 && input == ".") // no more than 1 coma in decimal
+        // ) {
+        //   // return prev;
+        // } else {
+        //   acceptedInput = input;
+        // }
+        // return prev + acceptedInput;
+        // finalInput = prev + acceptedInput;
+      }
+
+      console.log(" setInputUser ~ finalInput", finalInput);
+      return finalInput;
+    });
+  };
+
   return (
     <div className="mx-4 px-3 py-4">
       <div className="mx-auto w-72 rounded-md bg-purple-400 px-5 py-6">
@@ -100,13 +189,13 @@ const Calculator = () => {
             onChange={(e) => {
               let allowedInput = e.target.value;
 
-              const disallowedChars = /[^0-9+\-*/%.]+/g;
+              const disallowedChars = /[^0-9+\-*/%.×÷]+/g;
               if (allowedInput.match(disallowedChars)) {
                 allowedInput = allowedInput.replace(disallowedChars, "");
               }
 
+              inputHandler(allowedInput);
               setInputUser(allowedInput);
-              // inputHandler(allowedInput);
             }}
             onKeyDown={(e) => {}}
             ref={inputRef}
@@ -116,6 +205,14 @@ const Calculator = () => {
             autoComplete="off"
             value={inputUser}
           />
+
+          {/* <span
+            className={`text-right outline-none text-3xl font-semibold h-10 max-w-none ${
+              !inputUser ? "border-r" : ""
+            }`}
+          >
+            {inputUser}
+          </span> */}
           <p className="ml-auto text-xl mt-1 opacity-60 min-h-7">{result}</p>
         </div>
         <hr className="border-t-1 my-1" />
@@ -152,14 +249,21 @@ const Calculator = () => {
 
 const Button = ({ input, setInputUser }) => {
   const buttonHandler = (input) => {
-    const operators = ["+", "-", "×", "÷"];
+    const operators = ["+", "-", "×", "÷", "*", "/"];
 
     setInputUser((prev) => {
       let acceptedInput = "";
       let finalResult = "";
 
       if (prev == "") {
-        if (input == "+" || input == "×" || input == "÷" || input == "%") {
+        if (
+          input == "+" ||
+          input == "×" ||
+          input == "÷" ||
+          input == "*" ||
+          input == "/" ||
+          input == "%"
+        ) {
           acceptedInput = "";
         } else {
           if (input == ".") {
@@ -179,8 +283,13 @@ const Button = ({ input, setInputUser }) => {
 
         if (
           (operators.includes(prev.slice(-1)) &&
-            (input == "+" || input == "×" || input == "÷" || input == "%")) ||
-          // all of these 4, operators(except "-") and "%" can't be inputted after operators
+            (input == "+" ||
+              input == "×" ||
+              input == "÷" ||
+              input == "*" ||
+              input == "/" ||
+              input == "%")) ||
+          // all of these operators(except "-") and "%" can't be inputted after operators
           (operators.includes(prev.slice(-1)) &&
             operators.includes(prev.slice(-2, -1)) &&
             input == "-") || // preventing repeated "-" because previous logic
