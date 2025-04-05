@@ -1,19 +1,62 @@
 import React, { useEffect, useRef, useState } from "react";
 
 const Calculator = () => {
+  const button1Ref = useRef(null);
+  const button2Ref = useRef(null);
+  const button3Ref = useRef(null);
+  const button4Ref = useRef(null);
+  const button5Ref = useRef(null);
+  const button6Ref = useRef(null);
+  const button7Ref = useRef(null);
+  const button8Ref = useRef(null);
+  const button9Ref = useRef(null);
+  const button0Ref = useRef(null);
+  const buttonDotRef = useRef(null);
+  const buttonPercentRef = useRef(null);
+  const buttonPlusRef = useRef(null);
+  const buttonMinusRef = useRef(null);
+  const buttonMultipleRef = useRef(null);
+  const buttonDivideRef = useRef(null);
+  const buttonClearRef = useRef(null);
+  const buttonBackspaceRef = useRef(null);
+  const buttonEqualRef = useRef(null);
+
+  useEffect(() => {
+    const keyHandler = (e) => {
+      const key = e.key;
+
+      if (key === "0") button0Ref.current?.click();
+      else if (key === "1") button1Ref.current?.click();
+      else if (key === "2") button2Ref.current?.click();
+      else if (key === "3") button3Ref.current?.click();
+      else if (key === "4") button4Ref.current?.click();
+      else if (key === "5") button5Ref.current?.click();
+      else if (key === "6") button6Ref.current?.click();
+      else if (key === "7") button7Ref.current?.click();
+      else if (key === "8") button8Ref.current?.click();
+      else if (key === "9") button9Ref.current?.click();
+      else if (key === ".") buttonDotRef.current?.click();
+      else if (key === "%") buttonPercentRef.current?.click();
+      else if (key === "+") buttonPlusRef.current?.click();
+      else if (key === "-") buttonMinusRef.current?.click();
+      else if (key === "*") buttonMultipleRef.current?.click();
+      else if (key === "/") buttonDivideRef.current?.click();
+      else if (key === "Enter" || key === "=") buttonEqualRef.current?.click();
+      else if (key === "Backspace") buttonBackspaceRef.current?.click();
+      else if (key.toLowerCase() === "c") buttonClearRef.current?.click();
+    };
+
+    window.addEventListener("keydown", (e) => keyHandler(e));
+
+    return window.removeEventListener("keydown", (e) => keyHandler(e));
+  }, []);
+  const [inputUser, setInputUser] = useState("");
+  const [result, setResult] = useState("0");
   // const inputRef = useRef(null);
 
   // useEffect(() => {
   //   inputRef.current.focus();
   // }, []);
-
-  const [inputUser, setInputUser] = useState("");
-  const [result, setResult] = useState("0");
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    inputRef.current.focus();
-  }, []);
 
   const checkOperators = (calculation, percentCalcsArgs) => {
     const removeLastChar = ["+", "-", "*", "/", "."];
@@ -96,61 +139,119 @@ const Calculator = () => {
     <div className="mx-4 px-3 py-4">
       <div className="mx-auto w-72 rounded-md bg-purple-400 px-5 py-6">
         <div className="flex flex-col">
-          <input
-            onChange={(e) => {
-              let allowedInput = e.target.value;
-
-              const disallowedChars = /[^0-9+\-*/%.]+/g;
-              if (allowedInput.match(disallowedChars)) {
-                allowedInput = allowedInput.replace(disallowedChars, "");
-              }
-
-              setInputUser(allowedInput);
-              // inputHandler(allowedInput);
-            }}
-            onKeyDown={(e) => {}}
-            ref={inputRef}
-            type="text"
-            className="text-right outline-none text-3xl font-semibold"
-            spellCheck={false}
-            autoComplete="off"
-            value={inputUser}
-          />
+          <p
+            className={`text-right outline-none text-3xl font-semibold h-10 ${
+              !inputUser.length > 0 ? "border-r" : ""
+            }`}
+          >
+            {inputUser}
+          </p>
           <p className="ml-auto text-xl mt-1 opacity-60 min-h-7">{result}</p>
         </div>
         <hr className="border-t-1 my-1" />
         {/* Buttons */}
         <div className="mt-3 grid grid-cols-4 grid-rows-5 gap-3 place-items-center">
-          <ClearButton setInputUser={setInputUser} />
-          <Button input={"%"} setInputUser={setInputUser} />
-          <BackspaceButton setInputUser={setInputUser} />
-          <Button input={"÷"} setInputUser={setInputUser} />
+          <ClearButton setInputUser={setInputUser} buttonRef={buttonClearRef} />
+          <Button
+            input={"%"}
+            setInputUser={setInputUser}
+            buttonRef={buttonPercentRef}
+          />
+          <BackspaceButton
+            setInputUser={setInputUser}
+            buttonRef={buttonBackspaceRef}
+          />
+          <Button
+            input={"÷"}
+            setInputUser={setInputUser}
+            buttonRef={buttonDivideRef}
+          />
 
-          <Button input={"7"} setInputUser={setInputUser} />
-          <Button input={"8"} setInputUser={setInputUser} />
-          <Button input={"9"} setInputUser={setInputUser} />
-          <Button input={"+"} setInputUser={setInputUser} />
+          <Button
+            input={"7"}
+            setInputUser={setInputUser}
+            buttonRef={button7Ref}
+          />
+          <Button
+            input={"8"}
+            setInputUser={setInputUser}
+            buttonRef={button8Ref}
+          />
+          <Button
+            input={"9"}
+            setInputUser={setInputUser}
+            buttonRef={button9Ref}
+          />
+          <Button
+            input={"+"}
+            setInputUser={setInputUser}
+            buttonRef={buttonPlusRef}
+          />
 
-          <Button input={"4"} setInputUser={setInputUser} />
-          <Button input={"5"} setInputUser={setInputUser} />
-          <Button input={"6"} setInputUser={setInputUser} />
-          <Button input={"-"} setInputUser={setInputUser} />
+          <Button
+            input={"4"}
+            setInputUser={setInputUser}
+            buttonRef={button4Ref}
+          />
+          <Button
+            input={"5"}
+            setInputUser={setInputUser}
+            buttonRef={button5Ref}
+          />
+          <Button
+            input={"6"}
+            setInputUser={setInputUser}
+            buttonRef={button6Ref}
+          />
+          <Button
+            input={"-"}
+            setInputUser={setInputUser}
+            buttonRef={buttonMinusRef}
+          />
 
-          <Button input={"1"} setInputUser={setInputUser} />
-          <Button input={"2"} setInputUser={setInputUser} />
-          <Button input={"3"} setInputUser={setInputUser} />
-          <Button input={"×"} setInputUser={setInputUser} />
+          <Button
+            input={"1"}
+            setInputUser={setInputUser}
+            buttonRef={button1Ref}
+          />
+          <Button
+            input={"2"}
+            setInputUser={setInputUser}
+            buttonRef={button2Ref}
+          />
+          <Button
+            input={"3"}
+            setInputUser={setInputUser}
+            buttonRef={button3Ref}
+          />
+          <Button
+            input={"×"}
+            setInputUser={setInputUser}
+            buttonRef={buttonMultipleRef}
+          />
 
-          <Button input={"."} setInputUser={setInputUser} />
-          <Button input={"0"} setInputUser={setInputUser} />
-          <EqualButton setInputUser={setInputUser} result={result} />
+          <Button
+            input={"."}
+            setInputUser={setInputUser}
+            buttonRef={buttonDotRef}
+          />
+          <Button
+            input={"0"}
+            setInputUser={setInputUser}
+            buttonRef={button0Ref}
+          />
+          <EqualButton
+            setInputUser={setInputUser}
+            result={result}
+            buttonRef={buttonEqualRef}
+          />
         </div>
       </div>
     </div>
   );
 };
 
-const Button = ({ input, setInputUser }) => {
+const Button = ({ input, setInputUser, buttonRef }) => {
   const buttonHandler = (input) => {
     const operators = ["+", "-", "×", "÷"];
 
@@ -162,11 +263,7 @@ const Button = ({ input, setInputUser }) => {
         if (input == "+" || input == "×" || input == "÷" || input == "%") {
           acceptedInput = "";
         } else {
-          if (input == ".") {
-            acceptedInput = "0.";
-          } else {
-            acceptedInput = input;
-          }
+          acceptedInput = input;
         }
 
         // return acceptedInput;
@@ -203,28 +300,32 @@ const Button = ({ input, setInputUser }) => {
 
   return (
     <button
-      onClick={() => buttonHandler(input)}
-      className="w-full h-12 text-2xl rounded-md bg-slate-600 text-slate-300 cursor-pointer hover:bg-slate-700 active:opacity-75 transition-colors"
+      onClick={() => {
+        buttonHandler(input);
+      }}
+      ref={buttonRef}
+      className="button_style bg-slate-600 hover:bg-slate-700"
     >
       {input}
     </button>
   );
 };
 
-const ClearButton = ({ setInputUser }) => {
+const ClearButton = ({ setInputUser, buttonRef }) => {
   return (
     <button
       onClick={() => {
         setInputUser("");
       }}
-      className="w-full h-12 text-2xl rounded-md bg-slate-600 text-slate-300 cursor-pointer hover:bg-slate-700 transition-colors"
+      ref={buttonRef}
+      className="button_style bg-red-500 hover:bg-red-600"
     >
       C
     </button>
   );
 };
 
-const BackspaceButton = ({ setInputUser }) => {
+const BackspaceButton = ({ setInputUser, buttonRef }) => {
   return (
     <button
       onClick={() => {
@@ -236,20 +337,24 @@ const BackspaceButton = ({ setInputUser }) => {
           }
         });
       }}
-      className="w-full h-12 text-2xl rounded-md bg-slate-600 text-slate-300 cursor-pointer hover:bg-slate-700 transition-colors"
+      ref={buttonRef}
+      className="button_style bg-rose-500 hover:bg-rose-600"
     >
       <IconBackspace />
     </button>
   );
 };
 
-const EqualButton = ({ setInputUser, result }) => {
+const EqualButton = ({ setInputUser, result, buttonRef }) => {
   return (
     <button
       onClick={() => {
-        setInputUser(result.toString());
+        if (result.toString().length > 0) {
+          setInputUser(result.toString());
+        }
       }}
-      className="w-full h-12 text-2xl col-span-2 rounded-md bg-orange-400 text-slate-300 cursor-pointer hover:bg-orange-500 transition-colors"
+      ref={buttonRef}
+      className="button_style bg-orange-400 hover:bg-orange-500 col-span-2"
     >
       =
     </button>
