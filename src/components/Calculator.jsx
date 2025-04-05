@@ -88,7 +88,11 @@ const Calculator = () => {
 
   useEffect(() => {
     const calculation = checkOperators(
-      inputUser.replaceAll("×", "*").replaceAll("--", "+").replaceAll("+-", "-")
+      inputUser
+        .replaceAll("×", "*")
+        .replaceAll("÷", "/")
+        .replaceAll("--", "+")
+        .replaceAll("+-", "-")
     );
     console.log(" useEffect ~ calculation", calculation);
 
@@ -118,7 +122,7 @@ const Calculator = () => {
           <ClearButton setInputUser={setInputUser} />
           <Button input={"%"} setInputUser={setInputUser} />
           <BackspaceButton setInputUser={setInputUser} />
-          <Button input={"/"} setInputUser={setInputUser} />
+          <Button input={"÷"} setInputUser={setInputUser} />
 
           <Button input={"7"} setInputUser={setInputUser} />
           <Button input={"8"} setInputUser={setInputUser} />
@@ -148,7 +152,7 @@ const Button = ({ input, setInputUser }) => {
   return (
     <button
       onClick={() => {
-        const operators = ["+", "-", "×", "/"];
+        const operators = ["+", "-", "×", "÷"];
 
         setInputUser((prev) => {
           let acceptedInput = "";
@@ -177,7 +181,7 @@ const Button = ({ input, setInputUser }) => {
               (operators.includes(prev.slice(-1)) &&
                 (input == "+" ||
                   input == "×" ||
-                  input == "/" ||
+                  input == "÷" ||
                   input == "%")) ||
               // all of these 4, operators(except "-") and "%" can't be inputted after operators
               (operators.includes(prev.slice(-1)) &&
