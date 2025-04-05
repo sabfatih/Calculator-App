@@ -11,9 +11,10 @@ const Calculator = () => {
   const [result, setResult] = useState("0");
 
   const checkOperators = (calculation, percentCalcsArgs) => {
+    const removeLastChar = ["+", "-", "*", "/", "."];
     const operators = ["+", "-", "*", "/"];
 
-    if (operators.includes(calculation.slice(-1))) {
+    if (removeLastChar.includes(calculation.slice(-1))) {
       const result = calculation.slice(0, -1);
       return checkOperators(result);
     } else {
@@ -134,7 +135,7 @@ const Calculator = () => {
           <Button input={"3"} setInputUser={setInputUser} />
           <Button input={"×"} setInputUser={setInputUser} />
 
-          <Button input={<IconExpand />} />
+          <Button input={"."} setInputUser={setInputUser} />
           <Button input={"0"} setInputUser={setInputUser} />
           <EqualButton setInputUser={setInputUser} result={result} />
         </div>
@@ -150,28 +151,51 @@ const Button = ({ input, setInputUser }) => {
         const operators = ["+", "-", "×", "/"];
 
         setInputUser((prev) => {
+          let acceptedInput = "";
+          let finalResult = "";
+
           if (prev == "0") {
             if (operators.includes(input) || input == "%") {
-              return "0";
+              acceptedInput = "0";
             } else {
-              return input;
+              if (input == ".") {
+                acceptedInput = "0.";
+              } else {
+                acceptedInput = input;
+              }
             }
+
+            // return acceptedInput;
+            finalResult = acceptedInput;
           } else {
+            const splitIndex = operators
+              .map((operator) => prev.lastIndexOf(operator))
+              .sort((a, b) => b - a)[0];
+            const lastNumber = prev.slice(splitIndex + 1);
+
             if (
               (operators.includes(prev.slice(-1)) &&
                 (input == "+" ||
                   input == "×" ||
                   input == "/" ||
                   input == "%")) ||
+              // all of these 4, operators(except "-") and "%" can't be inputted after operators
               (operators.includes(prev.slice(-1)) &&
                 operators.includes(prev.slice(-2, -1)) &&
-                input == "-")
+                input == "-") || // preventing repeated "-" because previous logic
+              (prev.slice(-1) == "." && input == ".") || // no coma repeated
+              (lastNumber.indexOf(".") > 0 && input == ".") // no more than 1 coma in decimal
             ) {
-              return prev;
+              // return prev;
             } else {
-              return prev + input;
+              acceptedInput = input;
             }
+
+            // return prev + acceptedInput;
+            finalResult = prev + acceptedInput;
           }
+
+          return finalResult;
         });
       }}
       className="w-full h-12 text-2xl rounded-md bg-slate-600 text-slate-300 cursor-pointer hover:bg-slate-700 transition-colors"
@@ -226,24 +250,6 @@ const EqualButton = ({ setInputUser, result }) => {
   );
 };
 
-const IconExpand = () => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      className="size-6 m-auto"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
-      />
-    </svg>
-  );
-};
 const IconBackspace = () => {
   return (
     <svg
