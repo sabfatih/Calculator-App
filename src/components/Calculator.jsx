@@ -7,8 +7,13 @@ const Calculator = () => {
   //   inputRef.current.focus();
   // }, []);
 
-  const [inputUser, setInputUser] = useState("0");
+  const [inputUser, setInputUser] = useState("");
   const [result, setResult] = useState("0");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current.focus();
+  }, []);
 
   const checkOperators = (calculation, percentCalcsArgs) => {
     const removeLastChar = ["+", "-", "*", "/", "."];
@@ -32,18 +37,6 @@ const Calculator = () => {
       const hasPercentCalculation = calculation.match(percentNumberRegex);
 
       if (hasPercentCalculation) {
-        const percentageItSelfRegex = /[+\-*/]\d+%/g;
-
-        const plusAndMinus = ["+", "-"];
-
-        console.log(
-          // plusAndMinus
-          //   .map((operator) => calculation.lastIndexOf(operator))
-          //   .sort((a, b) => b - a)
-
-          calculation.match(percentageItSelfRegex)
-        );
-
         const lastOperator = operators
           .map((operator) => calculation.lastIndexOf(operator))
           .sort((a, b) => b - a)[0];
@@ -78,9 +71,9 @@ const Calculator = () => {
             return calculate;
           }
         };
-        console.log(calculation);
+        // console.log(calculation);
         const finalResult = calculate1(calculation);
-        console.log(" checkOperators ~ finalResult", finalResult);
+        // console.log(" checkOperators ~ finalResult", finalResult);
         return finalResult;
       }
     }
@@ -94,7 +87,7 @@ const Calculator = () => {
         .replaceAll("--", "+")
         .replaceAll("+-", "-")
     );
-    console.log(" useEffect ~ calculation", calculation);
+    // console.log(" useEffect ~ calculation", calculation);
 
     setResult(calculation);
   }, [inputUser]);
@@ -102,19 +95,28 @@ const Calculator = () => {
   return (
     <div className="mx-4 px-3 py-4">
       <div className="mx-auto w-72 rounded-md bg-purple-400 px-5 py-6">
-        {/* <label className="text-right flex flex-col pt-8 px-3">
-          <input
-            type="text"
-            ref={inputRef}
-            className="bg-none text-xl ml-auto outline-none text-neutral-800"
-          />
-          <p className="">123</p>
-        </label> 
-        */}
-
         <div className="flex flex-col">
-          <p className="ml-auto text-2xl font-semibold">{inputUser}</p>
-          <p className="ml-auto text-xl">{result}</p>
+          <input
+            onChange={(e) => {
+              let allowedInput = e.target.value;
+
+              const disallowedChars = /[^0-9+\-*/%.]+/g;
+              if (allowedInput.match(disallowedChars)) {
+                allowedInput = allowedInput.replace(disallowedChars, "");
+              }
+
+              setInputUser(allowedInput);
+              // inputHandler(allowedInput);
+            }}
+            onKeyDown={(e) => {}}
+            ref={inputRef}
+            type="text"
+            className="text-right outline-none text-3xl font-semibold"
+            spellCheck={false}
+            autoComplete="off"
+            value={inputUser}
+          />
+          <p className="ml-auto text-xl mt-1 opacity-60 min-h-7">{result}</p>
         </div>
         <hr className="border-t-1 my-1" />
         {/* Buttons */}
@@ -149,60 +151,60 @@ const Calculator = () => {
 };
 
 const Button = ({ input, setInputUser }) => {
+  const buttonHandler = (input) => {
+    const operators = ["+", "-", "×", "÷"];
+
+    setInputUser((prev) => {
+      let acceptedInput = "";
+      let finalResult = "";
+
+      if (prev == "") {
+        if (input == "+" || input == "×" || input == "÷" || input == "%") {
+          acceptedInput = "";
+        } else {
+          if (input == ".") {
+            acceptedInput = "0.";
+          } else {
+            acceptedInput = input;
+          }
+        }
+
+        // return acceptedInput;
+        finalResult = acceptedInput;
+      } else {
+        const splitIndex = operators
+          .map((operator) => prev.lastIndexOf(operator))
+          .sort((a, b) => b - a)[0];
+        const lastNumber = prev.slice(splitIndex + 1);
+
+        if (
+          (operators.includes(prev.slice(-1)) &&
+            (input == "+" || input == "×" || input == "÷" || input == "%")) ||
+          // all of these 4, operators(except "-") and "%" can't be inputted after operators
+          (operators.includes(prev.slice(-1)) &&
+            operators.includes(prev.slice(-2, -1)) &&
+            input == "-") || // preventing repeated "-" because previous logic
+          (prev.slice(-1) == "." && input == ".") || // no coma repeated
+          (lastNumber.indexOf(".") > 0 && input == ".") // no more than 1 coma in decimal
+        ) {
+          // return prev;
+        } else {
+          acceptedInput = input;
+        }
+
+        // return prev + acceptedInput;
+        finalResult = prev + acceptedInput;
+      }
+
+      console.log(" setInputUser ~ finalResult", finalResult);
+      return finalResult;
+    });
+  };
+
   return (
     <button
-      onClick={() => {
-        const operators = ["+", "-", "×", "÷"];
-
-        setInputUser((prev) => {
-          let acceptedInput = "";
-          let finalResult = "";
-
-          if (prev == "0") {
-            if (operators.includes(input) || input == "%") {
-              acceptedInput = "0";
-            } else {
-              if (input == ".") {
-                acceptedInput = "0.";
-              } else {
-                acceptedInput = input;
-              }
-            }
-
-            // return acceptedInput;
-            finalResult = acceptedInput;
-          } else {
-            const splitIndex = operators
-              .map((operator) => prev.lastIndexOf(operator))
-              .sort((a, b) => b - a)[0];
-            const lastNumber = prev.slice(splitIndex + 1);
-
-            if (
-              (operators.includes(prev.slice(-1)) &&
-                (input == "+" ||
-                  input == "×" ||
-                  input == "÷" ||
-                  input == "%")) ||
-              // all of these 4, operators(except "-") and "%" can't be inputted after operators
-              (operators.includes(prev.slice(-1)) &&
-                operators.includes(prev.slice(-2, -1)) &&
-                input == "-") || // preventing repeated "-" because previous logic
-              (prev.slice(-1) == "." && input == ".") || // no coma repeated
-              (lastNumber.indexOf(".") > 0 && input == ".") // no more than 1 coma in decimal
-            ) {
-              // return prev;
-            } else {
-              acceptedInput = input;
-            }
-
-            // return prev + acceptedInput;
-            finalResult = prev + acceptedInput;
-          }
-
-          return finalResult;
-        });
-      }}
-      className="w-full h-12 text-2xl rounded-md bg-slate-600 text-slate-300 cursor-pointer hover:bg-slate-700 transition-colors"
+      onClick={() => buttonHandler(input)}
+      className="w-full h-12 text-2xl rounded-md bg-slate-600 text-slate-300 cursor-pointer hover:bg-slate-700 active:opacity-75 transition-colors"
     >
       {input}
     </button>
@@ -213,7 +215,7 @@ const ClearButton = ({ setInputUser }) => {
   return (
     <button
       onClick={() => {
-        setInputUser("0");
+        setInputUser("");
       }}
       className="w-full h-12 text-2xl rounded-md bg-slate-600 text-slate-300 cursor-pointer hover:bg-slate-700 transition-colors"
     >
@@ -228,7 +230,7 @@ const BackspaceButton = ({ setInputUser }) => {
       onClick={() => {
         setInputUser((prev) => {
           if (prev.length == 1) {
-            return "0";
+            return "";
           } else {
             return prev.slice(0, -1);
           }
