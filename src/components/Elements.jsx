@@ -22,30 +22,58 @@ export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
   const buttonBackspaceRef = useRef(null);
   const buttonEqualRef = useRef(null);
 
+  const inputRef = useRef(null);
+  useEffect(() => {
+    if (inputRef?.current) {
+      inputRef.current.scrollLeft = inputRef.current.scrollWidth;
+    }
+  }, [inputUser]);
+
   useEffect(() => {
     const keyHandler = (e) => {
       const key = e.key;
 
-      if (key === "0") button0Ref.current?.click();
-      else if (key === "1") button1Ref.current?.click();
-      else if (key === "2") button2Ref.current?.click();
-      else if (key === "3") button3Ref.current?.click();
-      else if (key === "4") button4Ref.current?.click();
-      else if (key === "5") button5Ref.current?.click();
-      else if (key === "6") button6Ref.current?.click();
-      else if (key === "7") button7Ref.current?.click();
-      else if (key === "8") button8Ref.current?.click();
-      else if (key === "9") button9Ref.current?.click();
-      else if (key === ".") buttonDotRef.current?.click();
-      else if (key === "%") buttonPercentRef.current?.click();
-      else if (key === "+") buttonPlusRef.current?.click();
-      else if (key === "-") buttonMinusRef.current?.click();
-      else if (key === "*") buttonMultipleRef.current?.click();
-      else if (key === "/") buttonDivideRef.current?.click();
-      else if (key === "=") buttonEqualRef.current?.click();
-      else if (key === "Backspace") buttonBackspaceRef.current?.click();
-      else if (e.shiftKey && key.toLowerCase() === "c")
+      if (key === "0") {
+        button0Ref.current?.click();
+      } else if (key === "1") {
+        button1Ref.current?.click();
+      } else if (key === "2") {
+        button2Ref.current?.click();
+      } else if (key === "3") {
+        button3Ref.current?.click();
+      } else if (key === "4") {
+        button4Ref.current?.click();
+      } else if (key === "5") {
+        button5Ref.current?.click();
+      } else if (key === "6") {
+        button6Ref.current?.click();
+      } else if (key === "7") {
+        button7Ref.current?.click();
+      } else if (key === "8") {
+        button8Ref.current?.click();
+      } else if (key === "9") {
+        button9Ref.current?.click();
+      } else if (key === ".") {
+        buttonDotRef.current?.click();
+      } else if (key === "%") {
+        buttonPercentRef.current?.click();
+      } else if (key === "+") {
+        buttonPlusRef.current?.click();
+      } else if (key === "-") {
+        buttonMinusRef.current?.click();
+      } else if (key === "*") {
+        buttonMultipleRef.current?.click();
+      } else if (key === "/") {
+        buttonDivideRef.current?.click();
+      } else if (key === "=") {
+        buttonEqualRef.current?.click();
+      } else if (e.ctrlKey && key === "Backspace") {
+        setInputUser("");
+      } else if (!e.crtlKey && key === "Backspace") {
+        buttonBackspaceRef.current?.click();
+      } else if (e.shiftKey && key.toLowerCase() === "c") {
         buttonClearRef.current?.click();
+      }
     };
 
     window.addEventListener("keydown", (e) => keyHandler(e));
@@ -57,15 +85,24 @@ export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
     <div className="mx-4 px-3 py-4">
       <div className="mx-auto w-72 rounded-md bg-purple-400 px-5 py-6">
         <div className="flex flex-col">
-          <p
-            className={`text-right outline-none text-3xl font-semibold min-h-10 ${
-              !inputUser.length > 0 ? "border-r" : ""
-            }`}
+          {/* <div className="min-w-full"> */}
+          <div
+            className="min-w-full overflow-x-scroll scrollbar_hide"
+            ref={inputRef}
           >
-            {inputUser}
+            <span
+              className={`block text-right outline-none text-3xl font-semibold min-h-10 whitespace-nowrap ${
+                !inputUser.length > 0 ? "border-r" : ""
+              }`}
+            >
+              {inputUser}
+            </span>
+          </div>
+          <p className="ml-auto mt-1 text-xl opacity-60 min-h-7 text-right">
+            {result}
           </p>
-          <p className="ml-auto text-xl mt-1 opacity-60 min-h-7">{result}</p>
         </div>
+        {/* </div> */}
         <hr className="border-t-1 my-1" />
         {/* Buttons */}
         <div className="mt-3 grid grid-cols-4 grid-rows-5 gap-3 place-items-center">
