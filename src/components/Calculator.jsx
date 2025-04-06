@@ -71,7 +71,7 @@ const Calculator = () => {
       // percent logic
       // also the calculation itself
       const operatorsRegex = /(?<![*/])(?=[+\-])/;
-      const plusMinusPercentNumberRegex = /([+\-]\d+%)/;
+      const plusMinusPercentNumberRegex = /([+\-]\d+(?:\.\d+)?%)/;
 
       let result = "";
       let calculations = input
@@ -79,11 +79,12 @@ const Calculator = () => {
         ?.filter((item) => item != ""); // clean the data
 
       console.log(" calculate ~ calculations", calculations);
-      const convertPercentRegex = /([+\-]?\d+)%/;
+      const convertPercentRegex = /([+\-])(\d+(?:\.\d+)?)%/g;
+
       const calculateNum = new Function(
         "calculation",
         "convertPercentRegex",
-        `return eval(calculation?.replace(convertPercentRegex, "($1/100)"))?.toString()`
+        `return eval(calculation?.replaceAll(convertPercentRegex, "$1($2/100)"))?.toString()`
       );
 
       let temporResult =
@@ -100,8 +101,11 @@ const Calculator = () => {
 
         if (second.match(plusMinusPercentNumberRegex)) {
           let percentNumber = new Function(
-            `return ${first + "*" + second.replace("%", "/100")}`
+            `return ${
+              first + "*" + second.replaceAll(convertPercentRegex, "$1($2/100)")
+            }`
           )().toString();
+          console.log("loooh", first + "*" + second);
 
           if (percentNumber[0] != "-") {
             percentNumber = "+" + percentNumber;
@@ -110,16 +114,17 @@ const Calculator = () => {
           result = new Function(`return ${first + percentNumber}`)().toString();
         } else {
           const operators = ["+", "-", "*", "/"];
-          let secondNumber = second;
+          let secondNumber = second.replaceAll(
+            convertPercentRegex,
+            "$1($2/100)"
+          );
           if (!operators.includes(secondNumber[0].toString())) {
             secondNumber = "+" + secondNumber;
           }
 
-          result = new Function(
-            `return ${first + secondNumber.replace("%", "/100")}`
-          )().toString();
-          console.log(first);
-          console.log(secondNumber);
+          result = new Function(`return ${first + secondNumber}`)().toString();
+          console.log("satuuuu", first);
+          console.log("dueeeeeee", secondNumber);
         }
         calculations = calculations.slice(2);
         calculations.unshift(result);
