@@ -41,9 +41,10 @@ const Calculator = () => {
       else if (key === "-") buttonMinusRef.current?.click();
       else if (key === "*") buttonMultipleRef.current?.click();
       else if (key === "/") buttonDivideRef.current?.click();
-      else if (key === "Enter" || key === "=") buttonEqualRef.current?.click();
+      else if (key === "=") buttonEqualRef.current?.click();
       else if (key === "Backspace") buttonBackspaceRef.current?.click();
-      else if (key.toLowerCase() === "c") buttonClearRef.current?.click();
+      else if (e.shiftKey && key.toLowerCase() === "c")
+        buttonClearRef.current?.click();
     };
 
     window.addEventListener("keydown", (e) => keyHandler(e));
@@ -52,78 +53,89 @@ const Calculator = () => {
   }, []);
   const [inputUser, setInputUser] = useState("");
   const [result, setResult] = useState("0");
-  // const inputRef = useRef(null);
 
-  // useEffect(() => {
-  //   inputRef.current.focus();
-  // }, []);
-
-  const checkOperators = (calculation, percentCalcsArgs) => {
+  const calculate = (input) => {
     const removeLastChar = ["+", "-", "*", "/", "."];
-    const operators = ["+", "-", "*", "/"];
 
-    if (removeLastChar.includes(calculation.slice(-1))) {
-      const result = calculation.slice(0, -1);
-      return checkOperators(result);
+    if (removeLastChar.includes(input.slice(-1))) {
+      const result = input.slice(0, -1);
+      return calculate(result);
     } else {
-      let percentCalcs = percentCalcsArgs || [];
-
       const divideByZeroRegex = /\/0/;
-      const isDivideByZero = calculation.match(divideByZeroRegex);
+      const isDivideByZero = input.match(divideByZeroRegex);
 
       if (isDivideByZero) {
-        setResult("Error");
-        return false;
+        return "Can't divide by 0";
       }
 
-      const percentNumberRegex = /(\d+)%/;
-      const hasPercentCalculation = calculation.match(percentNumberRegex);
+      // percent logic
+      // also the calculation itself
+      const operatorsRegex = /(?<![*/])(?=[+\-])/;
+      const plusMinusPercentNumberRegex = /([+\-]\d+%)/;
 
-      if (hasPercentCalculation) {
-        const lastOperator = operators
-          .map((operator) => calculation.lastIndexOf(operator))
-          .sort((a, b) => b - a)[0];
+      let result = "";
+      let calculations = input
+        .split(operatorsRegex) // split the number
+        ?.filter((item) => item != ""); // clean the data
 
-        const calc = calculation.slice(0, lastOperator);
-        const percentCalc = calculation.slice(lastOperator);
-        percentCalcs.push(percentCalc);
+      console.log(" calculate ~ calculations", calculations);
+      const convertPercentRegex = /([+\-]?\d+)%/;
+      const calculateNum = new Function(
+        "calculation",
+        "convertPercentRegex",
+        `return eval(calculation?.replace(convertPercentRegex, "($1/100)"))?.toString()`
+      );
 
-        return checkOperators(calc, percentCalcs);
-      } else {
-        const calculate1 = (calcYee) => {
-          const calculate = new Function(`return ${calcYee}`)();
-          if (percentCalcs.length > 0) {
-            const percent = percentCalcs[0].replace("%", "/100");
+      let temporResult =
+        calculateNum(calculations[0], convertPercentRegex) || "";
 
-            let result;
-            if (percent[0] == "*" || percent[0] == "/") {
-              const percentLogic = new Function(
-                `return ${calculate + percent}`
-              )();
+      while (calculations?.length > 1) {
+        const first = calculateNum(calculations[0], convertPercentRegex);
+        const second =
+          calculations[1].includes("*") || calculations[1].includes("/")
+            ? calculateNum(calculations[1], convertPercentRegex)
+            : calculations[1];
 
-              result = percentLogic;
-            } else {
-              const percentLogic = new Function(
-                `return ${calculate + "*" + percent}`
-              )();
-              result = calculate + percentLogic;
-            }
-            percentCalcs.shift();
-            return calculate1(result);
-          } else {
-            return calculate;
+        console.log(" calculate ~ calculations", calculations);
+
+        if (second.match(plusMinusPercentNumberRegex)) {
+          let percentNumber = new Function(
+            `return ${first + "*" + second.replace("%", "/100")}`
+          )().toString();
+
+          if (percentNumber[0] != "-") {
+            percentNumber = "+" + percentNumber;
+          } // prevent the number didn't have an operator like just "100"
+
+          result = new Function(`return ${first + percentNumber}`)().toString();
+        } else {
+          const operators = ["+", "-", "*", "/"];
+          let secondNumber = second;
+          if (!operators.includes(secondNumber[0].toString())) {
+            secondNumber = "+" + secondNumber;
           }
-        };
-        // console.log(calculation);
-        const finalResult = calculate1(calculation);
-        // console.log(" checkOperators ~ finalResult", finalResult);
+
+          result = new Function(
+            `return ${first + secondNumber.replace("%", "/100")}`
+          )().toString();
+          console.log(first);
+          console.log(secondNumber);
+        }
+        calculations = calculations.slice(2);
+        calculations.unshift(result);
+      }
+      if (calculations?.length == 1) {
+        if (result.length < 1) {
+          calculations.unshift(temporResult);
+        }
+        const finalResult = calculations[0];
         return finalResult;
       }
     }
   };
 
   useEffect(() => {
-    const calculation = checkOperators(
+    const calculation = calculate(
       inputUser
         .replaceAll("×", "*")
         .replaceAll("÷", "/")
@@ -140,7 +152,7 @@ const Calculator = () => {
       <div className="mx-auto w-72 rounded-md bg-purple-400 px-5 py-6">
         <div className="flex flex-col">
           <p
-            className={`text-right outline-none text-3xl font-semibold h-10 ${
+            className={`text-right outline-none text-3xl font-semibold min-h-10 ${
               !inputUser.length > 0 ? "border-r" : ""
             }`}
           >
@@ -257,7 +269,7 @@ const Button = ({ input, setInputUser, buttonRef }) => {
 
     setInputUser((prev) => {
       let acceptedInput = "";
-      let finalResult = "";
+      let finalInput = "";
 
       if (prev == "") {
         if (input == "+" || input == "×" || input == "÷" || input == "%") {
@@ -267,7 +279,7 @@ const Button = ({ input, setInputUser, buttonRef }) => {
         }
 
         // return acceptedInput;
-        finalResult = acceptedInput;
+        finalInput = acceptedInput;
       } else {
         const splitIndex = operators
           .map((operator) => prev.lastIndexOf(operator))
@@ -282,7 +294,8 @@ const Button = ({ input, setInputUser, buttonRef }) => {
             operators.includes(prev.slice(-2, -1)) &&
             input == "-") || // preventing repeated "-" because previous logic
           (prev.slice(-1) == "." && input == ".") || // no coma repeated
-          (lastNumber.indexOf(".") > 0 && input == ".") // no more than 1 coma in decimal
+          (lastNumber.indexOf(".") > 0 && input == ".") || // no more than 1 coma in decimal
+          (lastNumber.indexOf("%") > 0 && !operators.includes(input)) // no number after a percent number
         ) {
           // return prev;
         } else {
@@ -290,11 +303,10 @@ const Button = ({ input, setInputUser, buttonRef }) => {
         }
 
         // return prev + acceptedInput;
-        finalResult = prev + acceptedInput;
+        finalInput = prev + acceptedInput;
       }
 
-      console.log(" setInputUser ~ finalResult", finalResult);
-      return finalResult;
+      return finalInput;
     });
   };
 
@@ -349,8 +361,12 @@ const EqualButton = ({ setInputUser, result, buttonRef }) => {
   return (
     <button
       onClick={() => {
-        if (result.toString().length > 0) {
-          setInputUser(result.toString());
+        if (result == "Can't divide by 0") {
+          return false;
+        } else {
+          if (result?.toString().length > 0) {
+            setInputUser(result.toString());
+          }
         }
       }}
       ref={buttonRef}
