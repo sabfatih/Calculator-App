@@ -119,50 +119,53 @@ const Calculator = () => {
         .replaceAll("+-", "-")
     );
     let result = calculation || "";
+    if (result === "Infinity") {
+      setResult(result);
+    } else {
+      const formatNumber = (number) => {
+        // for formatting purpose(so thousands number can have coma(,))
+        let cuttedNumber = number;
+        let formattedInputNumber = [];
 
-    const formatNumber = (number) => {
-      // for formatting purpose(so thousands number can have coma(,))
-      let cuttedNumber = number;
-      let formattedInputNumber = [];
+        for (let i = number.length; i > 3; i -= 3) {
+          let x = i - 3;
+          let y = i;
 
-      for (let i = number.length; i > 3; i -= 3) {
-        let x = i - 3;
-        let y = i;
-
-        cuttedNumber = number.slice(0, x);
-        formattedInputNumber.push(number.slice(x, y));
-      }
-
-      formattedInputNumber.push(cuttedNumber);
-      return formattedInputNumber.reverse().join(",");
-    };
-
-    const splitWithOperatorRegex = /(?<=[+\-×÷*%/])|(?=[+\-×÷*%/])/g;
-    const splittedInput = result.split(splitWithOperatorRegex);
-
-    result = splittedInput
-      .map((rawNumber) => {
-        const operators = ["+", "-", "×", "÷"];
-        if (operators.includes(rawNumber)) {
-          // make sure that there's no operator and "%" because the array will like ["10","%", "+", "5"]
-          return rawNumber; // and return the operator
+          cuttedNumber = number.slice(0, x);
+          formattedInputNumber.push(number.slice(x, y));
         }
 
-        const dotIndex = rawNumber.indexOf("."); // to check if the number is decimal and get the index
-        let decimalValue = ""; // initial value that will be used if the number is not decimal
+        formattedInputNumber.push(cuttedNumber);
+        return formattedInputNumber.reverse().join(",");
+      };
 
-        if (dotIndex > 0) {
-          decimalValue = rawNumber.slice(dotIndex); // to get the decimal value "12.034" ---> ".034"
-          rawNumber = rawNumber.slice(0, dotIndex); // to remove the decimal value "12.034" ---> "12"
-        }
+      const splitWithOperatorRegex = /(?<=[+\-×÷*%/])|(?=[+\-×÷*%/])/g;
+      const splittedInput = result.split(splitWithOperatorRegex);
 
-        const formattedNumber = formatNumber(rawNumber);
-        const finalNumber = formattedNumber + decimalValue;
-        return finalNumber;
-      })
-      .join("");
+      result = splittedInput
+        .map((rawNumber) => {
+          const operators = ["+", "-", "×", "÷"];
+          if (operators.includes(rawNumber)) {
+            // make sure that there's no operator and "%" because the array will like ["10","%", "+", "5"]
+            return rawNumber; // and return the operator
+          }
 
-    setResult(result);
+          const dotIndex = rawNumber.indexOf("."); // to check if the number is decimal and get the index
+          let decimalValue = ""; // initial value that will be used if the number is not decimal
+
+          if (dotIndex > 0) {
+            decimalValue = rawNumber.slice(dotIndex); // to get the decimal value "12.034" ---> ".034"
+            rawNumber = rawNumber.slice(0, dotIndex); // to remove the decimal value "12.034" ---> "12"
+          }
+
+          const formattedNumber = formatNumber(rawNumber);
+          const finalNumber = formattedNumber + decimalValue;
+          return finalNumber;
+        })
+        .join("");
+
+      setResult(result);
+    }
   }, [inputUser]);
 
   return (
