@@ -3,9 +3,13 @@ import { useRef, useEffect } from "react";
 
 export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
   const inputRef = useRef(null);
+  const resultRef = useRef(null);
   useEffect(() => {
     if (inputRef?.current) {
       inputRef.current.scrollLeft = inputRef.current.scrollWidth;
+    }
+    if (resultRef?.current) {
+      resultRef.current.scrollLeft = resultRef.current.scrollWidth;
     }
   }, [inputUser]);
 
@@ -19,16 +23,21 @@ export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
             ref={inputRef}
           >
             <span
-              className={`block text-right outline-none text-3xl font-semibold min-h-10 whitespace-nowrap ${
+              className={`block text-right text-3xl font-semibold min-h-10 whitespace-nowrap ${
                 !inputUser.length > 0 ? "border-r animate_blinked" : ""
               }`}
             >
               {inputUser}
             </span>
           </div>
-          <p className="ml-auto mt-1 text-xl opacity-60 min-h-7 text-right">
-            {result}
-          </p>
+          <div
+            className="min-w-full overflow-x-scroll scrollbar_hide"
+            ref={resultRef}
+          >
+            <p className="block text-right mt-1 text-xl opacity-60 min-h-7 whitespace-nowrap">
+              {result}
+            </p>
+          </div>
         </div>
         {/* </div> */}
         <hr className="border-t-1 my-1" />
@@ -167,6 +176,13 @@ const Buttons = ({ setInputUser, result }) => {
         ) {
           // idk
         } else {
+          if (
+            prev.slice(-1) == "." &&
+            (operators.includes(input) || input == "%") // prevent dot at the end of a number
+          ) {
+            prev = prev.slice(0, -1);
+          }
+
           acceptedInput = input;
         }
 
