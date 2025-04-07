@@ -123,8 +123,6 @@ const Buttons = ({ setInputUser, result }) => {
       }
 
       let input = inputFromUser.replaceAll(",", "");
-      console.log(" setInputUser ~ prevaaaaaaaaaaaaa", previous);
-      console.log(" setInputUser ~ inputFromUser", inputFromUser);
       let acceptedInput = "";
       let finalInput = "";
 
@@ -139,6 +137,15 @@ const Buttons = ({ setInputUser, result }) => {
         }
 
         finalInput = acceptedInput;
+      } else if (prev == "0") {
+        if (
+          !(operators.includes(input) || input == "%" || input == ".") &&
+          input.length > 0
+        ) {
+          finalInput = input;
+        } else {
+          finalInput = "0" + input;
+        }
       } else {
         const splitIndex = operators
           .map((operator) => prev.lastIndexOf(operator))
@@ -158,6 +165,7 @@ const Buttons = ({ setInputUser, result }) => {
             (!operators.includes(input) || input == ".")) || // no number or dot after a percent number
           (lastNumberPrev == "0" && input == "0")
         ) {
+          // idk
         } else {
           acceptedInput = input;
         }
@@ -193,10 +201,10 @@ const Buttons = ({ setInputUser, result }) => {
       const formattedInput = splittedInput
         .map((rawNumber) => {
           if (operators.includes(rawNumber)) {
-            return rawNumber;
+            // make sure that there's no operator because the array will like ["10", "+", "5"]
+            return rawNumber; // and return the operator
           }
           let number = rawNumber;
-          const percentIndex = number.indexOf("%"); // to check if the number is a percentage
           const dotIndex = number.indexOf("."); // to check if the number is decimal and get the index
           let decimalValue = ""; // initial value that will be used if the number is not decimal
 
@@ -204,23 +212,17 @@ const Buttons = ({ setInputUser, result }) => {
             decimalValue = number.slice(dotIndex); // to get the decimal value "12.034" ---> ".034"
             number = number.slice(0, dotIndex); // to remove the decimal value "12.034" ---> "12"
           }
-          // console.log("wawiwooo", decimalValue);
 
           const numberToBeFormatted = number.replace("%", "");
 
           const formattedNumber = formatNumber(numberToBeFormatted);
-          const finalNumber =
-            formattedNumber + decimalValue + (percentIndex > 0 ? "%" : "");
+          const finalNumber = formattedNumber + decimalValue;
           return finalNumber;
         })
         .join("");
 
-      // expectedValue = ["50000", "40332%", "30.23", "20", '10']
-
-      // finalInput = formatNumber(inputWithoutDecimal);
-      // console.log("dululah", finalInput + decimalValue);
-
-      return formattedInput;
+      finalInput = formattedInput;
+      return finalInput;
     });
   };
 
