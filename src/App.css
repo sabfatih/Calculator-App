@@ -17,3 +17,19 @@ body {
 .scrollbar_hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.05;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate_blinked {
+  animation: 1.5s blink linear infinite;
+}

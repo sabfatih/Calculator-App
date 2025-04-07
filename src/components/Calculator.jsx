@@ -6,6 +6,9 @@ const Calculator = () => {
   const [result, setResult] = useState("0");
 
   const calculate = (inputFromUser) => {
+    let input = inputFromUser;
+    input = input.replaceAll(",", ""); // to remove any coma for thousands number so it can be calculated
+
     const notationChecker = (params) => {
       const hasNotationCheckRegex = /\d+(\.\d+)?e[+-]?\d+/gi;
       if (hasNotationCheckRegex.test(params)) {
@@ -23,7 +26,7 @@ const Calculator = () => {
     };
     const removeLastChar = ["+", "-", "*", "/", "."];
 
-    let input = notationChecker(inputFromUser);
+    input = notationChecker(input);
 
     if (removeLastChar.includes(input.slice(-1))) {
       const slicedInput = input.slice(0, -1);
@@ -47,7 +50,7 @@ const Calculator = () => {
         ?.filter((item) => item != ""); // clean the data
 
       console.log(" calculate ~ calculations", calculations);
-      const convertPercentRegex = /([+\-*/])(\d+(?:\.\d+)?)%/g;
+      const convertPercentRegex = /([+\-*/]?)(\d+(?:\.\d+)?)%/g;
 
       const calculateNum = new Function(
         "calculation",
@@ -128,104 +131,7 @@ const Calculator = () => {
   );
 };
 
-export const Button = ({ input, setInputUser, buttonRef }) => {
-  const buttonHandler = (input) => {
-    const operators = ["+", "-", "×", "÷"];
-
-    setInputUser((prev) => {
-      let acceptedInput = "";
-      let finalInput = "";
-
-      if (prev == "") {
-        if (input == "+" || input == "×" || input == "÷" || input == "%") {
-          acceptedInput = "";
-        } else {
-          acceptedInput = input;
-        }
-
-        finalInput = acceptedInput;
-      } else {
-        const splitIndex = operators
-          .map((operator) => prev.lastIndexOf(operator))
-          .sort((a, b) => b - a)[0];
-        const lastNumberPrev = prev.slice(splitIndex + 1);
-
-        if (
-          (operators.includes(prev.slice(-1)) &&
-            (input == "+" || input == "×" || input == "÷" || input == "%")) ||
-          // all of these 4, operators(except "-") and "%" can't be inputted after operators
-          (operators.includes(prev.slice(-1)) &&
-            operators.includes(prev.slice(-2, -1)) &&
-            input == "-") || // preventing repeated "-" because previous logic
-          (prev.slice(-1) == "." && input == ".") || // no dot repeated
-          (lastNumberPrev.indexOf(".") > 0 && input == ".") || // no more than 1 dot in decimal
-          (lastNumberPrev.indexOf("%") > 0 &&
-            (!operators.includes(input) || input == ".")) || // no number or dot after a percent number
-          (lastNumberPrev == "0" && input == "0")
-        ) {
-        } else {
-          acceptedInput = input;
-        }
-
-        finalInput = prev + acceptedInput;
-      }
-
-      finalInput = finalInput
-        .replace(/([+\-×÷*/])\./g, "$10.") // replace "10+.5" to "10+0.5"
-        .replace(/\.([+\-×÷*/])/g, "$1") // replace "5.+10" to "5+10"
-        .replace(/([+\-×÷*/])0+(\d+)/g, "$1$2"); // replace "+00012" to "12"
-
-      // const hasNotationCheckRegex = /\d+(\.\d+)?e[+-]?\d+/i;
-
-      // ------------------------UNSOLVED------------------------
-      // remove the operators, "10+20*-30" ---> ["10", "20", "30"]
-
-      const numbersOnlyRegex = /\d+(\.\d+)?/g;
-      const tes = finalInput.replaceAll(numbersOnlyRegex, (match) => {
-        let styledNumber = match.toString();
-        let decimalValue = "";
-        const indexOfDot = match.indexOf(".");
-
-        const styleHandler = (number) => {
-          const temporResultYe = [];
-          for (let i = 0; i < number.length; i += 3) {
-            let x = -i;
-            let y = x + 3;
-            if (y > 0) {
-              y = 0;
-            }
-
-            temporResultYe.push(number.slice(x, y));
-          }
-
-          return temporResultYe.sort((a, b) => b - a);
-        };
-
-        if (indexOfDot > 0) {
-          styledNumber = styledNumber.slice(0, indexOfDot + 1);
-          decimalValue = styledNumber.slice(indexOfDot);
-        }
-
-        if (styledNumber.length > 3) {
-          styleHandler(styledNumber);
-        }
-
-        console.log("daiman", styledNumber + decimalValue);
-        return styledNumber + decimalValue;
-      });
-      // for styling purpose(so thousands number can have coma(,))
-      console.log(" setInputUser ~ tes", tes);
-
-      // if (hasNotationCheckRegex.test(finalInput)) {
-
-      // }
-      // ------------------------UNSOLVED------------------------
-
-      console.log(finalInput);
-      return finalInput;
-    });
-  };
-
+export const Button = ({ input, buttonRef, buttonHandler }) => {
   return (
     <button
       onClick={() => {
