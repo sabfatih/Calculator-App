@@ -137,14 +137,14 @@ const Calculator = () => {
       return formattedInputNumber.reverse().join(",");
     };
 
-    const splitWithOperatorRegex = /(?<=[+\-×÷*/])|(?=[+\-×÷*/])/g;
+    const splitWithOperatorRegex = /(?<=[+\-×÷*%/])|(?=[+\-×÷*%/])/g;
     const splittedInput = result.split(splitWithOperatorRegex);
 
     result = splittedInput
       .map((rawNumber) => {
         const operators = ["+", "-", "×", "÷"];
         if (operators.includes(rawNumber)) {
-          // make sure that there's no operator because the array will like ["10", "+", "5"]
+          // make sure that there's no operator and "%" because the array will like ["10","%", "+", "5"]
           return rawNumber; // and return the operator
         }
 

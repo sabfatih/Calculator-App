@@ -158,12 +158,12 @@ const Buttons = ({ setInputUser, result }) => {
           // all of these 4, operators(except "-") and "%" can't be inputted after operators
           (operators.includes(prev.slice(-1)) &&
             operators.includes(prev.slice(-2, -1)) &&
-            input == "-") || // preventing repeated "-" because previous logic
-          (prev.slice(-1) == "." && input == ".") || // no dot repeated
-          (lastNumberPrev.indexOf(".") > 0 && input == ".") || // no more than 1 dot in decimal
+            input == "-") || // prevent repeated "-" because previous logic
+          (prev.slice(-1) == "." && input == ".") || // prevent dot repeated
+          (lastNumberPrev.indexOf(".") > 0 && input == ".") || // prevent more than 1 dot in decimal
           (lastNumberPrev.indexOf("%") > 0 &&
-            (!operators.includes(input) || input == ".")) || // no number or dot after a percent number
-          (lastNumberPrev == "0" && input == "0")
+            (!operators.includes(input) || input == ".")) || // prevent number or dot after a percent number
+          (lastNumberPrev == "0" && input == "0") // prevent zero repeated like "000023"
         ) {
           // idk
         } else {
@@ -195,13 +195,13 @@ const Buttons = ({ setInputUser, result }) => {
         return temporResultYe.reverse().join(",");
       };
 
-      const splitWithOperatorRegex = /(?<=[+\-×÷*/])|(?=[+\-×÷*/])/g;
+      const splitWithOperatorRegex = /(?<=[+\-×÷*%/])|(?=[+\-×÷*%/])/g;
       const splittedInput = finalInput.split(splitWithOperatorRegex);
 
       const formattedInput = splittedInput
         .map((rawNumber) => {
-          if (operators.includes(rawNumber)) {
-            // make sure that there's no operator because the array will like ["10", "+", "5"]
+          if (operators.includes(rawNumber) || rawNumber == "%") {
+            // make sure that there's no operator and "%" because the array will like ["10","%", "+", "5"]
             return rawNumber; // and return the operator
           }
           let number = rawNumber;
@@ -213,9 +213,9 @@ const Buttons = ({ setInputUser, result }) => {
             number = number.slice(0, dotIndex); // to remove the decimal value "12.034" ---> "12"
           }
 
-          const numberToBeFormatted = number.replace("%", "");
+          // const numberToBeFormatted = number.replace("%", "");
 
-          const formattedNumber = formatNumber(numberToBeFormatted);
+          const formattedNumber = formatNumber(number);
           const finalNumber = formattedNumber + decimalValue;
           return finalNumber;
         })
