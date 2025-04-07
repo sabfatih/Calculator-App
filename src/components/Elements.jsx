@@ -1,5 +1,5 @@
 import { Button } from "./Calculator";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
   const inputRef = useRef(null);
@@ -13,28 +13,41 @@ export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
     }
   }, [inputUser]);
 
+  const [obah, setObah] = useState(false);
+
   return (
     <div className="mx-4 px-3 py-4">
+      <button
+        onClick={() => setObah((prev) => !prev)}
+        className="size-16 absolute top-10 right-10 bg-sky-300 rounded-md shadow cursor-pointer hover:bg-sky-400 active:opacity-70"
+      ></button>
+
       <div className="mx-auto w-72 rounded-md bg-purple-400 px-5 py-6">
         <div className="flex flex-col">
-          {/* <div className="min-w-full"> */}
           <div
-            className="min-w-full overflow-x-scroll scrollbar_hide"
+            className="min-w-full overflow-x-scroll scrollbar_hide overflow-y-hidden"
             ref={inputRef}
           >
             <span
-              className={`block text-right text-3xl font-semibold min-h-10 whitespace-nowrap ${
+              className={`block text-right text-3xl font-semibold min-h-10 whitespace-nowrap text-sky-200 ${
                 !inputUser.length > 0 ? "border-r animate_blinked" : ""
-              }`}
+              } ${obah ? "-translate-y-full" : ""} transition-all duration-250`}
             >
               {inputUser}
             </span>
           </div>
           <div
-            className="min-w-full overflow-x-scroll scrollbar_hide"
+            className="min-w-full overflow-x-scroll scrollbar_hide overflow-y-visible"
             ref={resultRef}
           >
-            <p className="block text-right mt-1 text-xl opacity-60 min-h-7 whitespace-nowrap">
+            <p
+              className={`block text-right mt-1 font-semibold min-h-7 border opacity-60 whitespace-nowrap
+                           ${
+                             obah
+                               ? "text-3xl -translate-y-full min-h-10"
+                               : "text-lg"
+                           } transition-all`}
+            >
               {result}
             </p>
           </div>
