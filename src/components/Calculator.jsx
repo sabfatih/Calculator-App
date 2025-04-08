@@ -6,8 +6,8 @@ const Calculator = () => {
   const [result, setResult] = useState("0");
 
   const calculate = (inputFromUser) => {
-    let input = inputFromUser;
-    input = input.replaceAll(",", ""); // to remove any coma for thousands number so it can be calculated
+    let rawInput = inputFromUser;
+    rawInput = rawInput.replaceAll(",", ""); // to remove any coma for thousands number so it can be calculated
 
     const notationChecker = (params) => {
       const hasNotationCheckRegex = /\d+(\.\d+)?e[+-]?\d+/gi;
@@ -26,7 +26,7 @@ const Calculator = () => {
     };
     const removeLastChar = ["+", "-", "*", "/", "."];
 
-    input = notationChecker(input);
+    let input = notationChecker(rawInput);
 
     if (removeLastChar.includes(input.slice(-1))) {
       const slicedInput = input.slice(0, -1);
@@ -49,7 +49,6 @@ const Calculator = () => {
         .split(plusMinusOperatorsRegex) // split the number
         ?.filter((item) => item != ""); // clean the data
 
-      console.log(" calculate ~ calculations", calculations);
       const convertPercentRegex = /([+\-*/]?)(\d+(?:\.\d+)?)%/g;
 
       const calculateNum = new Function(
@@ -94,8 +93,6 @@ const Calculator = () => {
           }
 
           result = new Function(`return ${first + secondNumber}`)().toString();
-          // console.log("satuuuu", first);
-          // console.log("dueeeeeee", secondNumber);
         }
         calculations = calculations.slice(2);
         calculations.unshift(result);
@@ -105,7 +102,12 @@ const Calculator = () => {
           calculations.unshift(temporResult);
         }
         const finalResult = calculations[0];
-        return finalResult;
+        if (finalResult == rawInput) {
+          // to make sure user is calculate something, not just typing number. So the result would be the real result of a calculation
+          return "";
+        } else {
+          return finalResult;
+        }
       }
     }
   };
