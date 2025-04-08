@@ -3,10 +3,10 @@ import { CalculatorContainer } from "./Elements";
 
 const Calculator = () => {
   const [inputUser, setInputUser] = useState("");
-  const [result, setResult] = useState("0");
+  const [result, setResult] = useState("");
 
   const calculate = (inputFromUser) => {
-    let rawInput = inputFromUser;
+    let rawInput = inputFromUser; // initial value
     rawInput = rawInput.replaceAll(",", ""); // to remove any coma for thousands number so it can be calculated
 
     const convertScienceNotation = (numbers) => {
@@ -16,7 +16,8 @@ const Calculator = () => {
           Number(matchedItem).toLocaleString("fullwide", {
             useGrouping: false,
           })
-        ); // replace the matched number with the "real" number
+        );
+        // replace the matched number with the "real" number
 
         return convertedNumber;
       } else {
@@ -28,33 +29,33 @@ const Calculator = () => {
 
     const lastCharCheck = ["+", "-", "*", "/", "."];
     if (lastCharCheck.includes(input.slice(-1))) {
-      // check if the calculations last char is operator or "." with the array
-      const slicedInput = input.slice(0, -1);
-      return calculate(slicedInput);
+      // check if the calculations last char is operator or "."
+      const slicedInput = input.slice(0, -1); // removed it
+      return calculate(slicedInput); // call this function to repeat the check process
     } else {
       const isDivideByZeroRegex = /\/0(?!\d|\.)/; // regex to find "/0" ("01" or "0.1" doesn't match)
-      const isDivideByZero = input.match(isDivideByZeroRegex);
+      const isDivideByZero = input.match(isDivideByZeroRegex); // check the number with the regex
 
       if (isDivideByZero) {
         return "Can't divide by 0";
       }
 
-      // ----------------- percent logic -----------------
-      // also the calculation itself
+      // ---------------------- the main calculation logic ----------------------
 
       const plusMinusOperatorsRegex = /(?<![*/])(?=[+\-])/; // used to split the number with "+" or "-"(except if that is begin with "*" or "/") so it can be calculated with the modern percent logic
       const plusMinusPercentNumberRegex = /([+\-]\d+(?:\.\d+)?%)/; // used to check if the number is splitted number percent value like "+20%" or "-50.45%"
 
-      let result = "";
+      let result = ""; // initial value of result
       let calculations = input
         .split(plusMinusOperatorsRegex) // split the number
-        ?.filter((item) => item != ""); // clean the data so it wont be any empty string ("") inside the array
-      // the whole calculation that splitted into array like this:
+        ?.filter(Boolean); // clean the data so it wont be any empty string ("") inside the array
+
+      // calculations is the whole calculation that splitted into array like this:
       // "100*-20.45+30%" ---> ["100*-20.45", "+30%"]
 
       const convertPercentRegex = /([+\-*/]?)(\d+(?:\.\d+)?)%/g; // used to convert percent number, change "%" to "/100" if it have "*" or "/" operator
 
-      const calculateNum = new Function(
+      const calculateHandler = new Function(
         "calculation",
         "convertPercentRegex",
         `return eval(calculation?.replaceAll(convertPercentRegex, "$1($2/100)"))?.toString()`
@@ -65,7 +66,7 @@ const Calculator = () => {
       // so the regex is captured the "-40.5%" and replaced it with "-(40.5/100)", so the final numbers is:
       // "+20*-(40.5/100)"
 
-      let first = calculateNum(calculations[0], convertPercentRegex) || "";
+      let first = calculateHandler(calculations[0], convertPercentRegex) || "";
       // calculate the first calculation/number so it will be 1 number only, not a calculation
       // also temporary result
 
@@ -74,12 +75,12 @@ const Calculator = () => {
         first = convertScienceNotation(first); // make sure the number is a real number
         const second =
           calculations[1].includes("*") || calculations[1].includes("/")
-            ? calculateNum(calculations[1], convertPercentRegex)
+            ? calculateHandler(calculations[1], convertPercentRegex)
             : // calculate if it's include "*" or "/"(indicated that it's a multiplication/division)
               calculations[1];
 
         if (second.match(plusMinusPercentNumberRegex)) {
-          // check if the second is a percent number like "-20%" or "30.45%"
+          // check if the second is a percent number like "-20%" and "30.45%"
 
           let percentNumber = new Function(
             `return ${
@@ -101,7 +102,7 @@ const Calculator = () => {
           let secondNumber = second.replaceAll(
             convertPercentRegex,
             "$1($2/100)"
-          ); // replace "%" to "/100" like function calculateNum
+          ); // replace "%" to "/100" like function calculateHandler
 
           if (!operators.includes(secondNumber[0].toString())) {
             secondNumber = "+" + secondNumber; // prevent the number didn't have an operator
@@ -139,47 +140,48 @@ const Calculator = () => {
         .replaceAll("+-", "-")
     ); // replace the invalid operator
     let result = calculation || "";
-    if (result === "Infinity") {
+    if (result == "Infinity" || result == "Can't divide by 0") {
       setResult(result); // set result as "Infinity" straight away so it's not get formatted to "In,fin,ity"
     } else {
       const formatNumber = (number) => {
         // for formatting purpose(so thousands number can have coma (,) )
         let cuttedNumber = number; // initial value
-        let formattedInputNumber = []; // initial array
+        let splittedNumber = []; // initial array
 
         // for example : "12345678"
         for (let i = number.length; i > 3; i -= 3) {
           let x = i - 3;
           let y = i;
 
-          cuttedNumber = number.slice(0, x); // the rest of the number("12")
-          formattedInputNumber.push(number.slice(x, y)); // slice the number backwards after every 3 index
-          // the array would be ["678", "345"]
+          cuttedNumber = number.slice(0, x); // the rest of the number: ("12")
+          splittedNumber.push(number.slice(x, y)); // slice the number backwards after every 3 index and pushed it into the array: ["678", "345"]
         }
 
-        formattedInputNumber.push(cuttedNumber); // the array would be ["678", "345", "12"]
-        return formattedInputNumber
+        splittedNumber.push(cuttedNumber); // the array would be ["678", "345", "12"]
+        return splittedNumber
           .reverse() // the array would be ["12","345","678"]
           .join(","); // turn the array into string and added "," to separated it: "12,345,678"
       };
 
-      const splitWithNonNumberRegex = /(?<=[+\-×÷*%/])|(?=[+\-×÷*%/])/g; // splitted the non-number so it wont be formatted and can be combined again later
-      const splittedInput = result.split(splitWithNonNumberRegex); // splitted the number with the non-number:
-      // "1234*-56.78%" ---> ["1234", "*", "-", "56.78", "%"]
+      const minusRegex = /^(-)/; // used to split the minus symbol at the beginning so it wont be formatted and can be combined again later
+      const splittedInput = result
+        .split(minusRegex)
+        // splitted the number with minus symbol:
+        // "-1234.5678" ---> ["-", "1234.5678"]
+        .filter(Boolean); // make sure there is no empty string ("")
 
-      result = splittedInput
+      let formattedResult = splittedInput
         .map((rawNumber) => {
-          const operators = ["+", "-", "×", "÷"];
-          if (operators.includes(rawNumber) || rawNumber == "%") {
-            // check if it's a non-number
+          if (rawNumber.indexOf("-") > -1) {
+            // check if it's a minus
             return rawNumber; // and return that without formatted it
           }
 
-          let number = rawNumber;
+          let number = rawNumber; // initial value
           const dotIndex = number.indexOf("."); // to check if the number is decimal and get the index of the dot
           let decimalValue = ""; // initial value that will be used if the number is not decimal
 
-          if (dotIndex > 0) {
+          if (dotIndex > -1) {
             // check if the number has dot, indicated that is a decimal number
             decimalValue = number.slice(dotIndex); // to get the decimal value: "12.034" ---> ".034"
             number = number.slice(0, dotIndex); // to remove the decimal value: "12.034" ---> "12"
@@ -189,9 +191,9 @@ const Calculator = () => {
           const finalNumber = formattedNumber + decimalValue; // combine the number with it's decimal value
           return finalNumber;
         })
-        .join(""); // combined all of them: ["1234", "*", "-", "56.78", "%"] ---> "1,234*-56.78%"
+        .join(""); // combined all of them: ["-", "1234.5678"] ---> "-1,234.5678"
 
-      setResult(result); // set the result
+      setResult(formattedResult); // set the result
     }
   }, [inputUser]);
 

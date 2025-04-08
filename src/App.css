@@ -12,7 +12,7 @@ body {
 }
 
 .scrollbar_hide {
-  /* hiding scrollbar without removing it's feature */
+  /* custom utility class that hiding scrollbar without removing it's feature */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }

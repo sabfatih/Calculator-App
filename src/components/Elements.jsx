@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
   const inputRef = useRef(null);
   const resultRef = useRef(null);
-  const tesRef = useRef(null);
+
   useEffect(() => {
     if (inputRef?.current) {
       inputRef.current.scrollLeft = inputRef.current.scrollWidth;
@@ -12,7 +12,7 @@ export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
     if (resultRef?.current) {
       resultRef.current.scrollLeft = resultRef.current.scrollWidth;
     }
-  }, [inputUser]);
+  }, [inputUser]); // auto scroll to right, so when user inputted too many numbers user auto see the end of the numbers, and they can scroll to the left so see the rest
 
   const [animateResult, setAnimateResult] = useState(false);
 
@@ -89,6 +89,7 @@ const Buttons = ({ setInputUser, result, setAnimateResult, animateResult }) => {
   const buttonClearRef = useRef(null);
   const buttonBackspaceRef = useRef(null);
   const buttonEqualRef = useRef(null);
+  // refs to handle keyboard click
 
   useEffect(() => {
     const keyHandler = (e) => {
@@ -140,132 +141,158 @@ const Buttons = ({ setInputUser, result, setAnimateResult, animateResult }) => {
     window.addEventListener("keydown", (e) => keyHandler(e));
 
     return window.removeEventListener("keydown", (e) => keyHandler(e));
-  }, []);
+  }, []); // keyboard click handler
 
   const buttonHandler = (inputFromUser, isBackSpace) => {
+    // inputFromUser is just a single char string, like "1", "-", and "."
+
     const operators = ["+", "-", "×", "÷"];
 
     setInputUser((previous) => {
-      let prev = previous.replaceAll(",", "");
+      let prev = previous.replaceAll(",", ""); // reset the format of prev calculation
 
       if (isBackSpace) {
-        prev = prev.slice(0, -1);
+        prev = prev.slice(0, -1); // remove the last char of the prev input
         if (prev.slice(-2, -1).toLowerCase() == "e") {
-          prev = prev.slice(0, -2);
+          // check if the result of backspaced number is is an invalid scientific notation number like "1.23e+"
+          prev = prev.slice(0, -2); // remove the "e+"
         }
+        // the inputFromUser will be "" and it's okay
       }
 
-      let input = inputFromUser.replaceAll(",", "");
-      let acceptedInput = "";
-      let finalInput = "";
+      let input = inputFromUser.replaceAll(",", ""); // reset the format of prev data
+      let acceptedInput = ""; // initial value
+      let finalCalculation = ""; // initial value
 
       if (prev == "") {
+        // check if the prev is exactly "", indicated it's the first inputted character from user
         if (input == "+" || input == "×" || input == "÷" || input == "%") {
+          // prevent user from input those character as the first char of their input
           acceptedInput = "";
         } else {
           acceptedInput = input;
           if (input == ".") {
-            acceptedInput = "0.";
+            acceptedInput = "0."; // so user can understand that ".XXX" is "0.XXX"
           }
         }
 
-        finalInput = acceptedInput;
+        finalCalculation = acceptedInput;
       } else if (prev == "0") {
         if (
           !(operators.includes(input) || input == "%" || input == ".") &&
           input.length > 0
         ) {
-          finalInput = input;
+          // check if the input is number
+          finalCalculation = input;
+          // prevent weird number like "01234" or even "0000123"
         } else {
-          finalInput = "0" + input;
+          finalCalculation = "0" + input;
         }
       } else {
         const splitIndex = operators
           .map((operator) => prev.lastIndexOf(operator))
           .sort((a, b) => b - a)[0];
-        const lastNumberPrev = prev.slice(splitIndex + 1);
+        const lastNumberPrev = prev.slice(splitIndex + 1); // get the last number from the prev input
 
-        const hasNotationCheckRegex = /^-?\d+(\.\d+)?e[+-]?\d+$/i;
+        const notationRegex = /^-?\d+(\.\d+)?e[+-]?\d+$/i; // used to check if a string is EXACTLY a scientific notation number:
+        // "1.23e+23" is matched
+        // "1.23e+2+" is not matched
 
         if (
           (operators.includes(prev.slice(-1)) &&
             (input == "+" || input == "×" || input == "÷" || input == "%")) ||
-          // all of these 4, operators(except "-") and "%" can't be inputted after operators
+          // prevent user input one of these 3 operators and "%" after an operator
           (operators.includes(prev.slice(-1)) &&
             operators.includes(prev.slice(-2, -1)) &&
-            input == "-") || // prevent repeated "-" because previous logic
-          (prev.slice(-1) == "." && input == ".") || // prevent dot repeated
-          (lastNumberPrev.indexOf(".") > 0 && input == ".") || // prevent more than 1 dot in decimal
+            input == "-") ||
+          // prevent repeated "-" because prev logic
+          (prev.slice(-1) == "." && input == ".") ||
+          // prevent dot repeated
+          (lastNumberPrev.indexOf(".") > 0 && input == ".") ||
+          // prevent more than 1 dot in decimal
           (lastNumberPrev.indexOf("%") > 0 &&
-            (!operators.includes(input) || input == ".")) || // prevent number or dot after a percent number
-          (lastNumberPrev == "0" && input == "0") || // prevent zero repeated like "000023"
-          (hasNotationCheckRegex.test(prev) && input == ".") // prevent dot after scientific notation
+            (!operators.includes(input) || input == ".")) ||
+          // prevent number or dot after a percent symbol
+          (lastNumberPrev == "0" && input == "0") ||
+          // prevent zero repeated like "000023"
+          (notationRegex.test(prev) && input == ".")
+          // prevent dot after scientific notation
         ) {
-          // idk
+          acceptedInput = "";
         } else {
           if (
             prev.slice(-1) == "." &&
-            (operators.includes(input) || input == "%") // prevent dot at the end of a number
+            (operators.includes(input) || input == "%") // check if the last char of prev calculation is a dot
           ) {
             prev = prev.slice(0, -1);
+            // prevent dot at the end of a number after user input operator or "%" like "10.+5" and "10.%"
           }
 
           acceptedInput = input;
         }
 
-        finalInput = prev + acceptedInput;
+        finalCalculation = prev + acceptedInput; // combine the prev calculation with the input
       }
 
-      finalInput = finalInput
-        .replace(/([+\-×÷*/])\./g, "$10.") // replace "10+.5" to "10+0.5"
-        .replace(/\.([+\-×÷*/])/g, "$1") // replace "5.+10" to "5+10"
-        .replace(/([+\-×÷*/])0+(\d+)/g, "$1$2"); // replace "+00012" to "12"
+      finalCalculation = finalCalculation
+        .replace(/([+\-×÷*/])\./g, "$10.")
+        // "+." ---> "+0."
+        // replace "+.5" to "+0.5" ($1 is "+" in this example)
+        .replace(/\.([+\-×÷*/])/g, "$1");
+      // "5.-10" ---> "5-10"
+      // replace ".-" to "-" ($1 is "-" in this example)
 
       const formatNumber = (number) => {
         // for formatting purpose(so thousands number can have coma(,))
-        let cuttedNumber = number;
-        let temporResultYe = [];
+        let cuttedNumber = number; // initial value
+        let splittedNumber = []; // initial array
 
+        // for example : "12345678"
         for (let i = number.length; i > 3; i -= 3) {
           let x = i - 3;
           let y = i;
 
-          cuttedNumber = number.slice(0, x);
-          temporResultYe.push(number.slice(x, y));
+          cuttedNumber = number.slice(0, x); // the rest of the number: ("12")
+          splittedNumber.push(number.slice(x, y)); // slice the number backwards after every 3 index and pushed it into the array: ["678", "345"]
         }
 
-        temporResultYe.push(cuttedNumber);
-        return temporResultYe.reverse().join(",");
+        splittedNumber.push(cuttedNumber); // the array would be ["678", "345", "12"]
+        return splittedNumber
+          .reverse() // the array would be ["12","345","678"]
+          .join(","); // turn the array into string and added "," to separated it: "12,345,678"
       };
 
-      const splitWithOperatorRegex = /(?<=[+\-×÷*%/])|(?=[+\-×÷*%/])/g;
-      const splittedInput = finalInput.split(splitWithOperatorRegex);
+      const nonNumberRegex = /(?<=[+\-×÷*%/])|(?=[+\-×÷*%/])/g; // used to split the non-number symbols so it wont be formatted and can be combined again later
+      const splittedInput = finalCalculation
+        .split(nonNumberRegex)
+        // splitted the number with minus symbol:
+        // "-1234*-5678%" ---> ["-", "1234", "*", "-", "5678", "%"]
+        .filter(Boolean); // make sure there is no empty string ("")
 
       const formattedInput = splittedInput
         .map((rawNumber) => {
           if (operators.includes(rawNumber) || rawNumber == "%") {
-            // make sure that there's no operator and "%" because the array will like ["10","%", "+", "5"]
-            return rawNumber; // and return the operator
+            // check if it's a non-number
+            return rawNumber; // and return it
           }
-          let number = rawNumber;
-          const dotIndex = number.indexOf("."); // to check if the number is decimal and get the index
+          let number = rawNumber; // initial value
+          const dotIndex = number.indexOf("."); // to check if the number is decimal and get the index of the dot
           let decimalValue = ""; // initial value that will be used if the number is not decimal
 
           if (dotIndex > 0) {
+            // check if the number has dot, indicated that is a decimal number
             decimalValue = number.slice(dotIndex); // to get the decimal value "12.034" ---> ".034"
             number = number.slice(0, dotIndex); // to remove the decimal value "12.034" ---> "12"
           }
 
-          // const numberToBeFormatted = number.replace("%", "");
-
-          const formattedNumber = formatNumber(number);
-          const finalNumber = formattedNumber + decimalValue;
+          const formattedNumber = formatNumber(number); // format the number
+          const finalNumber = formattedNumber + decimalValue; // combine the number with it's decimal value
           return finalNumber;
         })
-        .join("");
+        .join(""); // combined all of them: ["-", "1234.5678"] ---> "-1,234.5678"
 
-      finalInput = formattedInput;
-      return finalInput;
+      finalCalculation = formattedInput;
+      return finalCalculation;
     });
   };
 
@@ -367,7 +394,7 @@ const Buttons = ({ setInputUser, result, setAnimateResult, animateResult }) => {
         setAnimateResult={setAnimateResult}
         animateResult={animateResult}
       />
-    </div>
+    </div> // HTML elemets of buttons
   );
 };
 
@@ -375,7 +402,7 @@ const ClearButton = ({ setInputUser, buttonRef }) => {
   return (
     <button
       onClick={() => {
-        setInputUser("");
+        setInputUser(""); // clear the input
       }}
       ref={buttonRef}
       className="button_style bg-red-500 hover:bg-red-600"
@@ -410,17 +437,17 @@ const EqualButton = ({
   return (
     <button
       onClick={() => {
-        if (result == "Can't divide by 0") {
+        if (result == "Infinity" || result == "Can't divide by 0") {
           return false;
+          // prevent animation if the result is "Infinity" or "Can't divide by 0"
         } else {
-          if (!animateResult) {
-            if (result?.toString().length > 0) {
-              setAnimateResult(true);
-              setTimeout(() => {
-                setAnimateResult(false);
-                setInputUser(result);
-              }, 250);
-            }
+          if (!animateResult && result?.toString().length > 0) {
+            // only do the equal if animation is being stopped and the result isn't empty
+            setAnimateResult(true);
+            setTimeout(() => {
+              setAnimateResult(false);
+              setInputUser(result);
+            }, 250); // stopped the animation after 250ms and set the inputUser
           }
         }
       }}
@@ -433,6 +460,7 @@ const EqualButton = ({
 };
 
 const IconBackspace = () => {
+  // Icon for backspace button
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
