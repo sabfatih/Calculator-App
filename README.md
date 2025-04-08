@@ -70,7 +70,7 @@ calculator-app/
 This project is licensed under the [**MIT License**](https://mit-license.org/) — feel free to use, modify, and share!
 
 ## 👤 Author
-Sabihisma Fatih
-[GitHub](github.com/sabfatih)
-[Instagram](https://www.instagram.com/sabfatiih)
-[Portfolio](sabihisma.vercel.app) (_Under Construction_)
+Sabihisma Fatih  
+[GitHub](github.com/sabfatih)  
+[Instagram](https://www.instagram.com/sabfatiih)  
+[Portfolio](sabihisma.vercel.app) (_Under Construction_)  
