@@ -202,6 +202,7 @@ const Calculator = () => {
       inputUser={inputUser}
       setInputUser={setInputUser}
       result={result}
+      setResult={setResult}
     /> // the actual calculator, contains html elements
   );
 };

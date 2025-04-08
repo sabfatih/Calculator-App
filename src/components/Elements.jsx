@@ -1,7 +1,12 @@
 import { Button } from "./Calculator";
 import { useRef, useEffect, useState } from "react";
 
-export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
+export const CalculatorContainer = ({
+  inputUser,
+  setInputUser,
+  result,
+  setResult,
+}) => {
   const inputRef = useRef(null);
   const resultRef = useRef(null);
 
@@ -61,6 +66,7 @@ export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
         <Buttons
           setInputUser={setInputUser}
           result={result}
+          setResult={setResult}
           setAnimateResult={setAnimateResult}
           animateResult={animateResult}
         />
@@ -69,7 +75,13 @@ export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
   );
 };
 
-const Buttons = ({ setInputUser, result, setAnimateResult, animateResult }) => {
+const Buttons = ({
+  setInputUser,
+  result,
+  setResult,
+  setAnimateResult,
+  animateResult,
+}) => {
   const button1Ref = useRef(null);
   const button2Ref = useRef(null);
   const button3Ref = useRef(null);
@@ -390,6 +402,7 @@ const Buttons = ({ setInputUser, result, setAnimateResult, animateResult }) => {
       <EqualButton
         setInputUser={setInputUser}
         result={result}
+        setResult={setResult}
         buttonRef={buttonEqualRef}
         setAnimateResult={setAnimateResult}
         animateResult={animateResult}
@@ -430,6 +443,7 @@ const BackspaceButton = ({ buttonRef, buttonHandler }) => {
 const EqualButton = ({
   setInputUser,
   result,
+  setResult,
   buttonRef,
   setAnimateResult,
   animateResult,
@@ -447,6 +461,7 @@ const EqualButton = ({
             setTimeout(() => {
               setAnimateResult(false);
               setInputUser(result);
+              setResult("");
             }, 250); // stopped the animation after 250ms and set the inputUser
           }
         }
