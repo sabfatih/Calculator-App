@@ -77,10 +77,10 @@ This project is licensed under the [**MIT License**](https://mit-license.org/) â
 
 <a href="https://github.com/sabfatih" target="_blank">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" width="20" /> GitHub
-</a>  
+</a><br>
 <a href="https://www.instagram.com/sabfatiih" target="_blank">
   <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="20" /> Instagram
-</a>  
+</a><br>
 <a href="https://sabihisma.vercel.app" target="_blank">
   ğŸŒ Portfolio <i>(Under Construction)</i>
-</a>  
+</a><br>
