@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
   const inputRef = useRef(null);
   const resultRef = useRef(null);
+  const tesRef = useRef(null);
   useEffect(() => {
     if (inputRef?.current) {
       inputRef.current.scrollLeft = inputRef.current.scrollWidth;
@@ -13,55 +14,62 @@ export const CalculatorContainer = ({ inputUser, setInputUser, result }) => {
     }
   }, [inputUser]);
 
-  const [obah, setObah] = useState(false);
+  const [animateResult, setAnimateResult] = useState(false);
 
   return (
     <div className="mx-4 px-3 py-4">
-      <button
-        onClick={() => setObah((prev) => !prev)}
-        className="size-16 absolute top-10 right-10 bg-sky-300 rounded-md shadow cursor-pointer hover:bg-sky-400 active:opacity-70"
-      ></button>
-
       <div className="mx-auto w-72 rounded-md bg-purple-400 px-5 py-6">
         <div className="flex flex-col">
           <div
-            className="min-w-full overflow-x-scroll scrollbar_hide overflow-y-hidden"
+            className="min-w-full overflow-x-scroll scrollbar_hide overflow-y-hidden relative min-h-10"
             ref={inputRef}
           >
             <span
-              className={`block text-right text-3xl font-semibold min-h-10 whitespace-nowrap text-sky-200 ${
+              className={`block absolute right-0 text-right text-3xl font-semibold min-h-10 whitespace-nowrap ${
                 !inputUser.length > 0 ? "border-r animate_blinked" : ""
-              } ${obah ? "-translate-y-full" : ""} transition-all duration-250`}
+              } ${
+                animateResult
+                  ? "-translate-y-full transition-all duration-250"
+                  : ""
+              }`}
             >
               {inputUser}
             </span>
           </div>
           <div
-            className="min-w-full overflow-x-scroll scrollbar_hide overflow-y-visible"
+            className={`min-w-full overflow-x-scroll scrollbar_hide overflow-y-visible relative h-10 ${
+              animateResult
+                ? "-translate-y-full transition-all duration-250"
+                : ""
+            }`}
             ref={resultRef}
           >
             <p
-              className={`block text-right mt-1 font-semibold min-h-7 border opacity-60 whitespace-nowrap
-                           ${
-                             obah
-                               ? "text-3xl -translate-y-full min-h-10"
-                               : "text-lg"
-                           } transition-all`}
+              className={`block absolute right-0 text-right font-semibold whitespace-nowrap ${
+                animateResult
+                  ? "text-3xl opacity-100 transition-all duration-250"
+                  : "text-lg opacity-60 mt-1"
+              }`}
             >
               {result}
             </p>
           </div>
         </div>
         {/* </div> */}
-        <hr className="border-t-1 my-1" />
+        <hr className="border-t-1 -mt-2 mb-1" />
         {/* Buttons */}
-        <Buttons setInputUser={setInputUser} result={result} />
+        <Buttons
+          setInputUser={setInputUser}
+          result={result}
+          setAnimateResult={setAnimateResult}
+          animateResult={animateResult}
+        />
       </div>
     </div>
   );
 };
 
-const Buttons = ({ setInputUser, result }) => {
+const Buttons = ({ setInputUser, result, setAnimateResult, animateResult }) => {
   const button1Ref = useRef(null);
   const button2Ref = useRef(null);
   const button3Ref = useRef(null);
@@ -142,6 +150,9 @@ const Buttons = ({ setInputUser, result }) => {
 
       if (isBackSpace) {
         prev = prev.slice(0, -1);
+        if (prev.slice(-2, -1).toLowerCase() == "e") {
+          prev = prev.slice(0, -2);
+        }
       }
 
       let input = inputFromUser.replaceAll(",", "");
@@ -174,6 +185,8 @@ const Buttons = ({ setInputUser, result }) => {
           .sort((a, b) => b - a)[0];
         const lastNumberPrev = prev.slice(splitIndex + 1);
 
+        const hasNotationCheckRegex = /^-?\d+(\.\d+)?e[+-]?\d+$/i;
+
         if (
           (operators.includes(prev.slice(-1)) &&
             (input == "+" || input == "×" || input == "÷" || input == "%")) ||
@@ -185,7 +198,8 @@ const Buttons = ({ setInputUser, result }) => {
           (lastNumberPrev.indexOf(".") > 0 && input == ".") || // prevent more than 1 dot in decimal
           (lastNumberPrev.indexOf("%") > 0 &&
             (!operators.includes(input) || input == ".")) || // prevent number or dot after a percent number
-          (lastNumberPrev == "0" && input == "0") // prevent zero repeated like "000023"
+          (lastNumberPrev == "0" && input == "0") || // prevent zero repeated like "000023"
+          (hasNotationCheckRegex.test(prev) && input == ".") // prevent dot after scientific notation
         ) {
           // idk
         } else {
@@ -350,6 +364,8 @@ const Buttons = ({ setInputUser, result }) => {
         setInputUser={setInputUser}
         result={result}
         buttonRef={buttonEqualRef}
+        setAnimateResult={setAnimateResult}
+        animateResult={animateResult}
       />
     </div>
   );
@@ -384,15 +400,27 @@ const BackspaceButton = ({ buttonRef, buttonHandler }) => {
   );
 };
 
-const EqualButton = ({ setInputUser, result, buttonRef }) => {
+const EqualButton = ({
+  setInputUser,
+  result,
+  buttonRef,
+  setAnimateResult,
+  animateResult,
+}) => {
   return (
     <button
       onClick={() => {
         if (result == "Can't divide by 0") {
           return false;
         } else {
-          if (result?.toString().length > 0) {
-            setInputUser(result.toString());
+          if (!animateResult) {
+            if (result?.toString().length > 0) {
+              setAnimateResult(true);
+              setTimeout(() => {
+                setAnimateResult(false);
+                setInputUser(result);
+              }, 250);
+            }
           }
         }
       }}
